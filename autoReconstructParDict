@@ -1,0 +1,55 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  4.1                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+autoReconstructPar
+{ 
+    type coded;
+    redirectType autoReconstructPar;
+    functionObjectLibs ("libutilityFunctionObjects.so"); 
+    writeControl outputTime;
+
+    deleteAfterReconstruct    true;
+    reconstructParFields    "all";//"(p U)";//"all"
+
+    codeData
+    #{
+        bool deleteAfterReconstruct_;
+        string reconstructParFields_;
+        string runTimeThisTime_;
+        string runTimeLastTme_;
+    #};
+    codeRead
+    #{
+        deleteAfterReconstruct_ = dict.lookupOrDefault<Switch>("deleteAfterReconstruct", false);        
+        reconstructParFields_   = dict.lookupOrDefault<string>("reconstructParFields", "all");
+        runTimeThisTime_ = "empty";
+        runTimeLastTme_ = "empty";
+        mkDir("postProcessing/autoReconstructPar");
+    #};
+    codeWrite
+    #{
+        Info<< "Execute reconstructPar." << endl << endl;
+        runTimeLastTme_ = runTimeThisTime_;
+        runTimeThisTime_ = mesh().time().timeName();
+        if( reconstructParFields_ == "all")
+        {
+            if (deleteAfterReconstruct_)
+            {
+                system("(reconstructPar -time " + runTimeThisTime_ + " && rm -rf processor*\/" + runTimeLastTme_ + " ) > postProcessing/autoReconstructPar/log.rec" + runTimeThisTime_ + "&" );
+            }
+            else
+            {
+                system("reconstructPar -time " + runTimeThisTime_ + " > postProcessing/autoReconstructPar/log.rec" + runTimeThisTime_ + "&" );
+            }
+        }
+        else
+        {
+            system("reconstructPar -time " + runTimeThisTime_ +" -fields \'" + reconstructParFields_ +"\'> postProcessing/autoReconstructPar/log.rec" + runTimeThisTime_ + "&" );
+        }
+    #};
+}
