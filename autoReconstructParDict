@@ -1,17 +1,17 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  4.1                                   |
+|  \\    /   O peration     | Version:  2.3.0                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
 autoReconstructPar
-{ 
+{
     type coded;
     redirectType autoReconstructPar;
     functionObjectLibs ("libutilityFunctionObjects.so"); 
-    writeControl outputTime;
+    outputControl outputTime;//writeControl outputTime;// This is for openfoam-2.3, "code" and codeWrite
 
     deleteAfterReconstruct    true;
     reconstructParFields    "all";//"(p U)";//"all"
@@ -31,7 +31,7 @@ autoReconstructPar
         runTimeLastTme_ = "empty";
         mkDir("postProcessing/autoReconstructPar");
     #};
-    codeWrite
+    code
     #{
         Info<< "Execute reconstructPar." << endl << endl;
         runTimeLastTme_ = runTimeThisTime_;
@@ -54,3 +54,4 @@ autoReconstructPar
     #};
 }
 
+// ************************************************************************* //
